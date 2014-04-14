@@ -1,0 +1,30 @@
+{
+  "name": "mirana",
+  "version": "0.0.1",
+  "description": "Simple scraping framework for nodejs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/longseespace/mirana.git"
+  },
+  "author": "Long Nguyen <long@seespace.co>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/longseespace/mirana/issues"
+  },
+  "homepage": "https://github.com/longseespace/mirana",
+  "dependencies": {
+    "broadway" : "0.2.9",
+    "async": "0.6.2",
+    "request": "2.34.0",
+    "MD5": "1.2.0",
+    "cheerio": "0.15.0",
+    "kue": "0.7.5",
+    "underscore": "1.6.0",
+    "mongoose": "3.8.8",
+    "optimist": "0.6.1"
+  }
+}

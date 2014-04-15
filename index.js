@@ -2,25 +2,41 @@ var broadway = require("broadway")
   , _ = require("underscore")
   , kue = require("kue")
   , JobManager = require("./lib/job_manager")
+  , SourceManager = require("./lib/source_manager")
   , config = require("./config.json")
-  , spawn = require('child_process').spawn
+  , child = require('child_process')
+  , app = require('./lib/http/app')
+  , logger = require('winston')
   ;
 
-var app = new broadway.App();
-app.jobManager = new JobManager(kue.createQueue({
+var mirana = new broadway.App();
+
+// Setup Logger
+logger.add(logger.transports.File, { filename: 'log/mirana.log' });
+
+// Start Job Manager
+mirana.jobManager = new JobManager(kue.createQueue({
   redis: config.redis
 }));
 
-app.use(require("./plugins/premierleague/index"), { app : app });
+// Load Sources
+mirana.sourceManager = new SourceManager;
+mirana.sourceManager.init().load(mirana, { jobManager : mirana.jobManager });
 
-app.init(function (err) {
-  if (err) {
-    console.log(err);
-  }
-  app.plugins['Barclay Premier League'].setup(function(){
-    
-  });
+// Load Web App
+app.set('port', config.app.httpPort);
+var server = app.listen(app.get('port'), function() {
+  logger.info('Mirana server listening on port ', server.address().port);
 });
 
-kue.app.listen(config.app.httpPort);
-kue.app.set('title', config.app.title);
+// Init App
+mirana.init(function (err) {
+  if (err) {
+    logger.error(err);
+  }
+});
+
+// Spawn Master
+var master = child.fork('./master', function(error, stdout, stderr){
+  logger.info(error, stdout, stderr);
+})

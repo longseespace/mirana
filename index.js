@@ -12,7 +12,7 @@ var broadway = require("broadway")
 var mirana = new broadway.App();
 
 // Setup Logger
-logger.add(logger.transports.File, { filename: 'log/mirana.log' });
+logger.add(logger.transports.File, { filename: 'logs/mirana.log' });
 
 // Start Job Manager
 mirana.jobManager = new JobManager(kue.createQueue({

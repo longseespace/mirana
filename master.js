@@ -12,7 +12,7 @@ var broadway = require("broadway")
 var master = new broadway.App();
 
 // Setup Logger
-logger.add(logger.transports.File, { filename: 'log/master.log' });
+logger.add(logger.transports.File, { filename: 'logs/master.log' });
 
 // Start Job Manager
 master.jobManager = new JobManager(kue.createQueue({

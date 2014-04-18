@@ -3,6 +3,7 @@ var broadway = require("broadway")
   , kue = require("kue")
   , JobManager = require("./lib/job_manager")
   , SourceManager = require("./lib/source_manager")
+  , TaskManager = require("./lib/task_manager")
   , config = require("./config.json")
   , child = require('child_process')
   , app = require('./lib/http/app')
@@ -14,14 +15,17 @@ var mirana = new broadway.App();
 // Setup Logger
 logger.add(logger.transports.File, { filename: 'logs/mirana.log' });
 
-// Start Job Manager
-mirana.jobManager = new JobManager(kue.createQueue({
+// Init Job Manager
+JobManager.init(kue.createQueue({
   redis: config.redis
 }));
 
+// Init Task Manager
+TaskManager.init();
+
 // Load Sources
-mirana.sourceManager = new SourceManager;
-mirana.sourceManager.init().load(mirana, { jobManager : mirana.jobManager });
+// mirana.sourceManager = new SourceManager;
+// mirana.sourceManager.init().load(mirana);
 
 // Load Web App
 app.set('port', config.app.httpPort);

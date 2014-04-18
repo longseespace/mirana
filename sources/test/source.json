@@ -1,0 +1,8 @@
+{
+  "name": "Test",
+  "id": "test",
+  "version": "0.0.1",
+  "icon": "icon.png",
+  "main": "index.js",
+  "author": "Long Nguyen <long@seespace.co>"
+}

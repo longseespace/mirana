@@ -27,8 +27,9 @@
     "mongoose": "3.8.8",
     "optimist": "0.6.1",
     "winston": "0.7.3",
-    "express": "4.0.0",
+    "q": "*",
 
+    "express": "4.0.0",
     "static-favicon": "~1.0.0",
     "morgan": "~1.0.0",
     "cookie-parser": "~1.0.1",

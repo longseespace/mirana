@@ -4,7 +4,7 @@ var broadway = require("broadway")
   , JobManager = require("./lib/job_manager")
   , SourceManager = require("./lib/source_manager")
   , TaskManager = require("./lib/task_manager")
-  , config = require("./config.json")
+  , config = require("./config")
   , spawn = require('child_process').spawn
   , app = require('./lib/http/app')
   , logger = require('winston')  
@@ -24,15 +24,13 @@ JobManager.init(kue.createQueue({
 TaskManager.init();
 
 // Load Sources
-master.sourceManager = new SourceManager;
-master.sourceManager.init().load(master);
+SourceManager.init(master).load();
 
 // Init App
 master.init(function (err) {
   if (err) {
     logger.error(err);
   }
-  master.plugins[0].setup();
-
-  JobManager.start("test");
+  SourceManager.getSourceById("premierleague").setup();
+  JobManager.start("premierleague");
 });

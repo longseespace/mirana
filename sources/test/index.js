@@ -16,6 +16,15 @@ exports.init = function(done) {
 };
 
 exports.setup = function(done) {
-  JobManager.create("test", ["mirana.download", "mirana.nop"], { uri: "http://google.com.vn" } );
+  JobManager.create(
+    "test", 
+    ["fetch", "log"], 
+    { 
+      data : {
+        uri: "http://www.premierleague.com/ajax/site-header.json",
+        json: true
+      }
+    } 
+  );
   return done && done();
 }

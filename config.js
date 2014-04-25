@@ -1,4 +1,4 @@
-{
+var config = {
   "app" : {
     "httpPort": 3000,
     "title": "Jobs"
@@ -12,5 +12,8 @@
   "mongoose": {
     "uri": "mongodb://dynabyte.vn/mirana",
     "options": {}
-  }
+  },
+  "disabled_plugins": ["test"]
 }
+
+module.exports = config

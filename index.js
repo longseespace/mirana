@@ -4,7 +4,7 @@ var broadway = require("broadway")
   , JobManager = require("./lib/job_manager")
   , SourceManager = require("./lib/source_manager")
   , TaskManager = require("./lib/task_manager")
-  , config = require("./config.json")
+  , config = require("./config")
   , child = require('child_process')
   , app = require('./lib/http/app')
   , logger = require('winston')
@@ -23,15 +23,13 @@ JobManager.init(kue.createQueue({
 // Init Task Manager
 TaskManager.init();
 
-// Load Sources
-// mirana.sourceManager = new SourceManager;
-// mirana.sourceManager.init().load(mirana);
-
 // Load Web App
 app.set('port', config.app.httpPort);
 var server = app.listen(app.get('port'), function() {
   logger.info('Mirana server listening on port ', server.address().port);
 });
+
+kue.app.listen(3001);
 
 // Init App
 mirana.init(function (err) {

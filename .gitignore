@@ -29,3 +29,8 @@ dump.rdb
 
 # Content
 content
+mirana.sublime-project
+mirana.sublime-workspace
+
+# Config
+config.js

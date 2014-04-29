@@ -8,6 +8,7 @@ var broadway = require("broadway")
   , spawn = require('child_process').spawn
   , app = require('./lib/http/app')
   , logger = require('winston')  
+  , cluster = require('cluster')
   ;
 
 var master = new broadway.App();
@@ -31,6 +32,11 @@ master.init(function (err) {
   if (err) {
     logger.error(err);
   }
-  SourceManager.getSourceById("premierleague").setup();
+
+  if (cluster.isMaster) {
+    SourceManager.getSourceById("premierleague").setup();
+  }
+
   JobManager.start("premierleague");
+  
 });

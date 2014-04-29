@@ -4,5 +4,10 @@
   "version": "0.0.1",
   "icon": "icon.png",
   "main": "index.js",
-  "author": "Long Nguyen <long@seespace.co>"
+  "author": "Long Nguyen <long@seespace.co>",
+  "queues": [
+    { "id": "premierleague" },
+    { "id": "premierleague.savePlayerList", "parallel": true },
+    { "id": "premierleague.updatePlayerProfile", "parallel": true }
+  ]
 }

@@ -10,7 +10,7 @@ var config = {
     "options": {}
   },
   "mongoose": {
-    "uri": "mongodb://dynabyte.vn/mirana",
+    "uri": "mongodb://localhost/mirana",
     "options": {}
   },
   "disabled_plugins": ["test"]

@@ -45,6 +45,8 @@ exports.init = function(done) {
 
   TaskManager.register("premierleague.savePlayerList", self.savePlayerList);
 
+  TaskManager.register("premierleague.updatePlayerProfile", self.updatePlayerProfile);
+
   return done && done();
 };
 
@@ -111,14 +113,36 @@ exports.setup = function(done) {
 
     // Get Player List
     JobManager.create(
-      "premierleague", 
+      "premierleague.savePlayerList", 
       ["download", "premierleague.savePlayerList"], 
       { 
         data: {
           uri: config.uri.playerList.replace(':limit', '1000').replace(':page', '1').replace(':season', config.currentSeason)
         }
       } 
-    );
+    ).on('complete', function(){
+
+      Player.find(null, function(err, players){
+
+        for (var i = 0; i < players.length; i++) {
+          var player = players[i];
+
+          JobManager.create(
+            "premierleague.updatePlayerProfile",
+            ["download", "premierleague.updatePlayerProfile"],
+            {
+              data: {
+                uri: config.uri.playerProfile.replace(':alias', player.alias)
+              },
+              player: player
+            }
+          );
+        };
+
+      })
+
+    });
+
   });
   
 
@@ -236,39 +260,44 @@ self.updateClubOverview = function(data, callback) {
 }
 
 self.updateClubStadium = function(data, callback) {
-  var body = data.data;
-  var club = data.club;
-  var $ = cheerio.load(body);
+  try {
+    var body = data.data;
+    var club = data.club;
+    var $ = cheerio.load(body);
 
-  var $info = $('.stadiuminformation table.contentTable tr td.info');
-  var stadium = {};
+    var $info = $('.stadiuminformation table.contentTable tr td.info');
+    var stadium = {};
 
-  stadium._id = club._id;
-  stadium.name = helper.trim($("#templatetitle").text().split('-')[1]);
-  stadium.address = $info.eq(0).find('p').html().replace(/<br>/g,' ');
-  stadium.year_built = ~~$info.eq(1).text();
-  stadium.capacity = ~~($info.eq(2).text().replace(/,/g,''));
-  stadium.pitch_area = $info.eq(3).text();
-  stadium.main_phone = $info.eq(4).text();
-  stadium.height = $info.eq(5).text();
+    stadium._id = club._id;
+    stadium.name = helper.trim($("#templatetitle").text().split('-')[1]);
+    stadium.address = $info.eq(0).find('p').html().replace(/<br>/g,' ');
+    stadium.year_built = ~~$info.eq(1).text();
+    stadium.capacity = ~~($info.eq(2).text().replace(/,/g,''));
+    stadium.pitch_area = $info.eq(3).text();
+    stadium.main_phone = $info.eq(4).text();
+    stadium.height = $info.eq(5).text();
 
-  club.stadium = stadium;
+    club.stadium = stadium;
 
-  Stadium.create(stadium);
+    Stadium.create(stadium);
 
-  var id = club._id;
-  delete club._id;
+    var id = club._id;
+    delete club._id;
 
-  Club.findByIdAndUpdate(id, club, { upsert: true }, function(err, model){
-    if (err) {
-      callback(err);
-      return;
-    }
+    Club.findByIdAndUpdate(id, club, { upsert: true }, function(err, model){
+      if (err) {
+        callback(err);
+        return;
+      }
 
-    callback(null, _.extend(data, { data: club }));
+      callback(null, _.extend(data, { data: club }));
 
-    logger.info("Stadium for " + club.name + " saved.");
-  })
+      logger.info("Stadium for " + club.name + " saved.");
+    })
+  } catch (err) {
+    callback(err);
+  }
+  
 }
 
 self.saveMatches = function(data, callback) {
@@ -335,4 +364,53 @@ self.savePlayerList = function(data, callback) {
   Player.create(players, function(err){
     callback(err, _.extend(data, { data: players }));
   });
+}
+
+self.updatePlayerProfile = function(data, callback) {
+  try {
+
+    var body = data.data;
+    var player = data.player;
+    var $ = cheerio.load(body);
+
+    var $rows = $('.playerprofileoverview .contentTable tr');
+  
+    player.dob = $rows.eq(1).find('td').eq(1).text();
+    player.height = $rows.eq(1).find('td').eq(2).text();
+    player.weight = $rows.eq(2).find('td').eq(3).text();
+    player.nationality = $rows.eq(3).find('td').eq(1).text();
+    player.appearances = ~~$rows.eq(6).find('td').eq(1).text();
+    player.titles_won = ~~$rows.eq(6).find('td').eq(3).text();
+    player.goals = ~~$rows.eq(7).find('td').eq(1).text();
+    player.yellow_cards = ~~$rows.eq(8).find('td').eq(1).text();
+    player.red_cards = ~~$rows.eq(9).find('td').eq(1).text();
+
+    player.image_urls = [
+      config.uri.base + $('.playerheader .heroimg').attr('src')
+    ];
+    player.position = $('.playerheader ul.stats > li').eq(1).find('p').text().toLowerCase();
+    player.fan_rating = +$('.playerheader ul.stats > li').eq(4).find('p').text();
+
+    if (isNaN(player.fan_rating)) {
+      player.fan_rating = 0;
+    };
+
+    var id = player._id;
+    delete player._id;
+
+    Player.findByIdAndUpdate(id, player, { upsert: true }, function(err, model){
+      if (err) {
+        callback(err);
+        return;
+      }
+
+      callback(null, _.extend(data, { data: player }));
+
+      logger.info("Player " + player.full_name + " updated.");
+    })
+  } catch (err) {
+    callback(err);
+  }
+
+  
 }

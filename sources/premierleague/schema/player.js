@@ -8,6 +8,7 @@ module.exports = new mongoose.Schema({
   position: String,
   last_name: String,
   squad_no: Number,
+  active: Boolean,
 
   dob: String,
   height: String,

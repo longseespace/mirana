@@ -34,9 +34,12 @@ master.init(function (err) {
   }
 
   if (cluster.isMaster) {
-    SourceManager.getSourceById("premierleague").setup();
+    // do the setup here
   }
 
-  JobManager.start("premierleague");
+  var sourceIds = SourceManager.getSourceIds();
+  for (var i = 0; i < sourceIds.length; i++) {
+    JobManager.start(sourceIds[i]);
+  }
   
 });
